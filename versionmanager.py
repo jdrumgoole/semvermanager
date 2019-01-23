@@ -1,6 +1,6 @@
 import os
 import argparse
-
+import tempfile
 
 class VersionError(ValueError):
     pass
@@ -8,7 +8,7 @@ class VersionError(ValueError):
 
 class Version:
 
-    TAGS = {0: "alpha", 1: "beta", 2:"production"}
+    TAGS = {0: "alpha", 1: "beta", 2: "prod"}
     FIELDS = ["major", "minor", "patch", "tag"]
     FILENAME = "VERSION"
 
@@ -83,6 +83,25 @@ class Version:
             self._tag_index +=1
         self._tag = Version.TAGS[self._tag_index]
 
+    def update(filename=None, version=None):
+        if not filename:
+            filename = Version.FILENAME
+
+        if not version:
+            version = Version()
+
+        with open(filename, "r") as input_file:
+            with open(filename+".temp", "w") as output_file:
+                for line in input_file:
+                    candidate = line.strip()
+                    if candidate.startswith("VERSION"):
+                        output_file.write(f"{str(version)}\n")
+                    else:
+                        output_file.write(line)
+
+        os.rename(filename, filename+".old")
+        os.rename(filename+".temp", filename)
+
     @staticmethod
     def write(filename=None, version=None):
         if not filename:
@@ -96,6 +115,28 @@ class Version:
 
         return filename, version
 
+    @staticmethod
+    def parse_version(line):
+        line.rstrip()
+        try:
+            version_label, rhs = line.split("=")
+            assert version_label == "VERSION"
+        except ValueError as e:
+            raise VersionError(e)
+
+        try:
+            version, tag = rhs.split("-")
+            tag = tag.strip()
+            version = version.strip()
+        except ValueError as e:
+            raise VersionError(e)
+
+        try:
+            major, minor, patch = [int(x) for x in version.split('.')]
+        except ValueError as e:
+            raise VersionError(e)
+
+        return Version(major, minor, patch, tag)
     @staticmethod
     def read(filename):
         if not filename:
@@ -172,6 +213,12 @@ if __name__ == "__main__":
         default=Version.FILENAME,
         help="File to use as version file [default: %(default)s]"
     )
+
+    parser.add_argument(
+        "--version",
+        help="Specify a version in the form major.minor.patch-tag"
+    )
+
     parser.add_argument(
         "--make",
         default=False,
@@ -195,7 +242,17 @@ if __name__ == "__main__":
         action="store_true",
         help="overwrite files without checking"
     )
+
+    parser.add_argument(
+        "--update",
+        default=False,
+        action="store_true",
+        help="Update multiple version strings in file"
+    )
     args = parser.parse_args()
+
+    if args.version:
+        version = Version.parse_version("VERSION="+args.version)
 
     if args.make:
         if  args.overwrite or not os.path.isfile(args.filename):
@@ -223,4 +280,8 @@ if __name__ == "__main__":
         print(f"to {v.field(args.bump)} in '{args.filename}'")
         Version.write(args.filename, v)
         print(f"new version: {v}")
+
+    if args.update:
+        print(f"Updating '{args.filename}' with version '{version}'")
+        Version.update(filename=args.filename, version=version)
 
