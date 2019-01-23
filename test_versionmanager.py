@@ -1,4 +1,5 @@
 import unittest
+from versionmanager import Version
 
 
 class Test_VersionManager(unittest.TestCase):
