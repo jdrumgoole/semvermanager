@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import argparse
+import os
+import sys
 
 from semvermanager import Version
 
@@ -36,6 +38,12 @@ if __name__ == "__main__":
         help="Report the current version in the specified file")
 
     parser.add_argument(
+        "--bareversion",
+        default=False,
+        action="store_true",
+        help="Return the unquoted version strin with VERSION=")
+
+    parser.add_argument(
         "--overwrite",
         default=False,
         action="store_true",
@@ -65,19 +73,27 @@ if __name__ == "__main__":
 
     if args.getversion:
         if os.path.isfile(args.filename):
-            v = Version.read(args.filename)
+            v = Version.find(args.filename)
             print(v)
+        else:
+            print(f"No such version file: '{args.filename}'")
+
+    if args.bareversion:
+        if os.path.isfile(args.filename):
+            v = Version.find(args.filename)
+            print(v.bare_version())
         else:
             print(f"No such version file: '{args.filename}'")
 
     if args.bump in Version.FIELDS:
         if not os.path.isfile(args.filename):
-            raise VersionError(f"No such file:'{args.filename}' can't bump {args.bump} version")
-        v = Version.read(args.filename)
+            print(f"No such file:'{args.filename}' can't bump {args.bump} version")
+            sys.exit(1)
+        v = Version.find(args.filename)
         print(f"Bumping '{args.bump}' value from {v.field(args.bump)} ", end="")
         v.bump(args.bump)
         print(f"to {v.field(args.bump)} in '{args.filename}'")
-        Version.write(args.filename, v)
+        Version.update(args.filename, v)
         print(f"new version: {v}")
 
     if args.update:

@@ -151,6 +151,10 @@ class Version:
 
     @staticmethod
     def write(filename, version):
+        """
+        Write a version to a file as a single line in the form
+        `VERSION = 'MAJOR.MINOR.PATH-TAG'`
+        """
 
         if not isinstance(version, Version):
             raise VersionError(f"{version} is not an instance of Version")
@@ -161,7 +165,24 @@ class Version:
         return filename, version
 
     @staticmethod
+    def find(filename):
+        """Look for the first instance of a VERSION definition in a file
+        and try and parse it as a `Version`"""
+
+        version = None
+        with open(filename, "r") as file:
+            for line in file:
+                line = line.strip()
+                if line.startswith("VERSION"):
+                    version = Version.parse_version(line)
+                    break
+
+        return version
+
+
+    @staticmethod
     def read(filename):
+        """Read a single lien from a file and try and parse it as `Version`"""
 
         with open(filename, "r") as file:
             line = file.readline()
@@ -206,7 +227,9 @@ class Version:
             if "-" in rhs:
                 version, tag = rhs.split("-")
                 tag = tag.strip()
+                tag = tag.strip("\"\'")
                 version = version.strip()
+                version = version.strip("\"\'")
             else:
                 raise VersionError(f"The tag value must be separated by a '-' in '{rhs}'")
         except ValueError as e:
@@ -230,5 +253,8 @@ class Version:
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.major}, {self.minor}, {self.patch}, '{self.tag}')"
+
+    def bare_version(self):
+        return f'{self._major}.{self._minor}.{self._patch}-{self._tag}'
 
 

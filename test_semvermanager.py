@@ -142,5 +142,17 @@ class TestVersionManager(unittest.TestCase):
         v = Version.parse_version("  0.0.0-alpha  ")
         self.assertEqual(v, Version(0, 0, 0, "alpha"))
 
+        # VERSION = '0.0.1-alpha'
+
+        v = Version.parse_version("VERSION = '0.0.1-alpha'")
+        self.assertEqual(v, Version(0, 0, 1, "alpha"))
+
+    def test_find(self):
+        # looking for VERSION = '0.0.1-alpha' in test_data
+
+        v = Version.find("test_data")
+        self.assertEqual(v, Version(0, 0, 1, "alpha"))
+
+
 if __name__ == '__main__':
     unittest.main()
