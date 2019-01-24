@@ -13,6 +13,9 @@ class Version:
     SEMVERs must be of the form a.b.c-tag, Where a,b and c are integers
     in the range 0-n and tag is one of `Version.TAGS`.
 
+    Version numbers may be bumped by using the various bump functions.
+    Bumping minor zeros patch, bumping major zeros minor.
+
     """
 
     TAGS = {0: "alpha", 1: "beta", 2: "prod"}
@@ -147,12 +150,10 @@ class Version:
         os.rename(filename+".temp", filename)
 
     @staticmethod
-    def write(filename=None, version=None):
-        if not filename:
-            filename = Version.FILENAME
+    def write(filename, version):
 
-        if not version:
-            version = Version()
+        if not isinstance(version, Version):
+            raise VersionError(f"{version} is not an instance of Version")
 
         with open(filename, "w") as file:
             file.write(f"{str(version)}\n")
@@ -161,8 +162,6 @@ class Version:
 
     @staticmethod
     def read(filename):
-        if not filename:
-            filename = Version.FILENAME
 
         with open(filename, "r") as file:
             line = file.readline()
@@ -176,7 +175,9 @@ class Version:
         try:
             version, tag = rhs.split("-")
             tag = tag.strip()
-            version = version.strip()
+            tag = tag.strip("\"\'")
+            version = version.strip()  # whitespace
+            version = version.strip("\"\'")  # quotes
         except ValueError as e:
             raise VersionError(e)
 
@@ -210,91 +211,16 @@ class Version:
 
         return Version(major, minor, patch, tag)
 
+    def __eq__(self, other):
+        return self.major == other.major and \
+               self.minor == other.minor and \
+               self.patch == other.patch and \
+               self.tag == other.tag
+
     def __str__(self):
-        return f"VERSION={self._major}.{self._minor}.{self._patch}-{self._tag}"
+        return f"VERSION='{self._major}.{self._minor}.{self._patch}-{self._tag}'"
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.major}, {self.minor}, {self.patch}, {self.tag})"
+        return f"{self.__class__.__name__}({self.major}, {self.minor}, {self.patch}, '{self.tag}')"
 
-
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--filename",
-        default=Version.FILENAME,
-        help="File to use as version file [default: %(default)s]"
-    )
-
-    parser.add_argument(
-        "--version",
-        help="Specify a version in the form major.minor.patch-tag"
-    )
-
-    parser.add_argument(
-        "--make",
-        default=False,
-        action="store_true",
-        help="Make a new version file")
-
-    parser.add_argument(
-        "--bump",
-        choices=Version.FIELDS,
-        help="Bump a version field")
-
-    parser.add_argument(
-        "--getversion",
-        default=False,
-        action="store_true",
-        help="Report the current version in the specified file")
-
-    parser.add_argument(
-        "--overwrite",
-        default=False,
-        action="store_true",
-        help="overwrite files without checking"
-    )
-
-    parser.add_argument(
-        "--update",
-        default=False,
-        action="store_true",
-        help="Update multiple version strings in file"
-    )
-    args = parser.parse_args()
-
-    if args.version:
-        version = Version.parse_version("VERSION="+args.version)
-
-    if args.make:
-        if args.overwrite or not os.path.isfile(args.filename):
-            filename, version = Version.write(args.filename)
-            print(f"Created {version} in '{args.filename}'")
-        elif os.path.isfile(args.filename):
-            answer = input(f"Overwrite file '{args.filename}' (Y/N [N]: ")
-            if len(answer) > 0 and answer.strip().lower() == 'y':
-                filename, version = Version.write(args.filename)
-                print(f"Overwrote {version} in '{args.filename}'")
-
-    if args.getversion:
-        if os.path.isfile(args.filename):
-            v = Version.read(args.filename)
-            print(v)
-        else:
-            print(f"No such version file: '{args.filename}'")
-
-    if args.bump in Version.FIELDS:
-        if not os.path.isfile(args.filename):
-            raise VersionError(f"No such file:'{args.filename}' can't bump {args.bump} version")
-        v = Version.read(args.filename)
-        print(f"Bumping '{args.bump}' value from {v.field(args.bump)} ", end="")
-        v.bump(args.bump)
-        print(f"to {v.field(args.bump)} in '{args.filename}'")
-        Version.write(args.filename, v)
-        print(f"new version: {v}")
-
-    if args.update:
-        print(f"Updating '{args.filename}' with version '{version}'")
-        Version.update(filename=args.filename, version=version)
 
