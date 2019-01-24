@@ -109,3 +109,4 @@ venv.bak/
 #local
 VERSION
 VERSION.old
+setup.py.old

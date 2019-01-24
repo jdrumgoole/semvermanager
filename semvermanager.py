@@ -229,10 +229,16 @@ class Version:
 
         return version
 
-
     @staticmethod
     def read(filename):
-        """Read a single lien from a file and try and parse it as `Version`"""
+        """
+        Read a single line from filename and parse it as version string.
+
+        :param filename: a file containing a single line VERSION string.
+        :return: a Version object
+
+        :raises VersionError if it fails to parse the file.
+        """
 
         with open(filename, "r") as file:
             line = file.readline()
