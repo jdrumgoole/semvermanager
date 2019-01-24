@@ -3,7 +3,7 @@ import os
 
 import temp
 
-from versionmanager import Version, VersionError
+from semvermanager import Version, VersionError
 
 
 class TestVersionManager(unittest.TestCase):
@@ -127,5 +127,20 @@ class TestVersionManager(unittest.TestCase):
         finally:
             if os.path.isfile(temp_filename):
                 os.unlink(temp_filename)
+
+    def test_parse_version(self):
+
+        v = Version.parse_version("0.0.0-alpha")
+        self.assertEqual(v, Version(0, 0, 0, "alpha"))
+
+        v = Version.parse_version("VERSION=0.0.0-alpha")
+        self.assertEqual(v, Version(0, 0, 0, "alpha"))
+
+        v = Version.parse_version("  VERSION  =  0.0.0-alpha  ")
+        self.assertEqual(v, Version(0, 0, 0, "alpha"))
+
+        v = Version.parse_version("  0.0.0-alpha  ")
+        self.assertEqual(v, Version(0, 0, 0, "alpha"))
+
 if __name__ == '__main__':
     unittest.main()

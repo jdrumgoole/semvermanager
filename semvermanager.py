@@ -190,24 +190,32 @@ class Version:
 
     @staticmethod
     def parse_version(line):
-        line.rstrip()
-        try:
-            version_label, rhs = line.split("=")
-            assert version_label == "VERSION"
-        except ValueError as e:
-            raise VersionError(e)
+        line = line.strip()
+        if line.startswith("VERSION"):
+            try:
+                version_label, rhs = line.split("=")
+                version_label = version_label.strip()
+                rhs = rhs.strip()
+                assert version_label == "VERSION"
+            except ValueError as e:
+                raise VersionError(f"{e} : in '{line}'")
+        else:
+            rhs = line
 
         try:
-            version, tag = rhs.split("-")
-            tag = tag.strip()
-            version = version.strip()
+            if "-" in rhs:
+                version, tag = rhs.split("-")
+                tag = tag.strip()
+                version = version.strip()
+            else:
+                raise VersionError(f"The tag value must be separated by a '-' in '{rhs}'")
         except ValueError as e:
-            raise VersionError(e)
+            raise VersionError(f"{e} : in '{rhs}'")
 
         try:
             major, minor, patch = [int(x) for x in version.split('.')]
         except ValueError as e:
-            raise VersionError(e)
+            raise VersionError(f"{e} : in '{version}'")
 
         return Version(major, minor, patch, tag)
 
@@ -218,7 +226,7 @@ class Version:
                self.tag == other.tag
 
     def __str__(self):
-        return f"VERSION='{self._major}.{self._minor}.{self._patch}-{self._tag}'"
+        return f"VERSION = '{self._major}.{self._minor}.{self._patch}-{self._tag}'"
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.major}, {self.minor}, {self.patch}, '{self.tag}')"
