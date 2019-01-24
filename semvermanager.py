@@ -2,7 +2,9 @@
 semvermanager
 =================
 `semvermamager` exports a single class Version which implements
-a restricted subset of the [SEMVER](http://semver.org) standard.
+a restricted subset of the  SEMVER_ standard.
+
+.. _SEMVER: http://semver.org/
 
 Version defines a Semantic version using the following field
 structure:
