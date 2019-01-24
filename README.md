@@ -26,10 +26,10 @@ zeros the MINOR and the PATCH value.
 The package includes a command line script for generating versions.
 
 ```bash
-$ ./semvergen -h
+$ ./bin/semvergen -h
 usage: semvergen [-h] [--filename FILENAME] [--version VERSION] [--make]
-                 [--bump {major,minor,patch,tag}] [--getversion] [--overwrite]
-                 [--update]
+                 [--bump {major,minor,patch,tag}] [--getversion]
+                 [--bareversion] [--overwrite] [--update]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -39,9 +39,10 @@ optional arguments:
   --bump {major,minor,patch,tag}
                         Bump a version field
   --getversion          Report the current version in the specified file
+  --bareversion         Return the unquoted version strin with VERSION=
   --overwrite           overwrite files without checking
   --update              Update multiple version strings in file
-
+$
 ```
 ## Installation
 ```python

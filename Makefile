@@ -21,6 +21,4 @@ test:
 release: test
 	git add -u
 	git commit -m"Checkin for release to pypi"
-	git tag -a `./bin/semvergen --bareversion --filename setup.py` -m"Relase to PYPI"
-	git push --tags
 	python3 setup.py upload
