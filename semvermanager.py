@@ -1,5 +1,32 @@
+"""
+semvermanager
+=================
+`semvermamager` exports a single class Version which implements
+a restricted subset of the [SEMVER](http://semver.org) standard.
+
+Version defines a Semantic version using the following field
+structure:
+
+.. code-block:: python
+
+    # MAJOR.MINOR.PATCH-TAG
+
+    int MAJOR  # 0 to N
+    int MINOR  # 0 to N
+    int PATCH  # 0 to N
+    str TAG    # one of "alpha", "beta", "prod".
+
+Versions may be bumped by a single increment using any of the
+`bump` functions. Bumping a PATCH value simply increments it.
+Bumping a MINOR value zeros the PATCH value and bumping a MAJOR
+zeros the MINOR and the PATCH value.
+
+`semvermanager` only supports Python 3.6 and greater.
+"""
+
 import os
 import argparse
+from typing import List
 
 
 class VersionError(ValueError):
@@ -43,25 +70,7 @@ class Version:
         if self._tag_index is None:
             raise VersionError(f"'{tag}' is not a valid version tag")
 
-    def get_field(self, field):
-        if field in self.FIELDS:
-            return self.field_map()[field]
-        else:
-            raise VersionError(f"No such field name: '{field}'")
 
-    def set_field(self, field, value):
-        if field == "TAG":
-            self.field_map()[field] = value
-        elif type(value) is int and value >= 0:
-            if field in self.FIELDS:
-                self.field_map()[field] = value
-            else:
-                raise VersionError(f"No such field name: '{field}'")
-        else:
-            raise VersionError(f"{value} is not an integer value 0 or greater")
-
-    def field(self, field):
-        return self.field_map()[field]
 
     def bump(self, field):
         self.bump_map()[field]()
@@ -118,42 +127,83 @@ class Version:
         self._tag = value
 
     def bump_map(self):
+        """
+        a mapping of field names to corresponding bump]
+        methods
+        :return: a dict of field names to bump methods
+        """
         return {"major": self.bump_major,
                 "minor": self.bump_minor,
                 "patch": self.bump_patch,
                 "tag": self.bump_tag}
 
     def field_map(self):
+        """
+        Mapping of field names to field values.
+        :return: A dict of field names to their properties.
+        """
         return {"major": self.major,
                 "minor": self.minor,
                 "patch": self.patch,
                 "tag": self.tag}
 
+    def field(self, field):
+        """
+        Return the mapping from a field to its corresponding
+        property.
+        :param field: str in Version.FIELDS
+        :return:
+        """
+
+        if field not in self.FIELDS:
+            raise VersionError(f"No such field name'{field}'")
+        return self.field_map()[field]
+
+
     @staticmethod
     def update(filename=None, version=None):
+        """
+        Find any line starting with "VERSION" and replace that line with
+        the new `version`.
+
+        :param filename: A path to a file containing at least one VERSION line
+        :param version: The new version object
+        :return: A tuple (number of lines updated, list(line_numbers))
+        """
         if not filename:
             filename = Version.FILENAME
 
         if not version:
             version = Version()
 
+        count = 0 # Number of replacements
+        lines: List[int] = [] # line numbers of replacement lines
         with open(filename, "r") as input_file:
             with open(filename+".temp", "w") as output_file:
-                for line in input_file:
+                for i, line in enumerate(input_file, 1):
                     candidate = line.strip()
                     if candidate.startswith("VERSION"):
                         output_file.write(f"{str(version)}\n")
+                        lines.append(i)
+                        count = count + 1
                     else:
                         output_file.write(line)
 
         os.rename(filename, filename+".old")
         os.rename(filename+".temp", filename)
 
+        return count, lines
+
+
     @staticmethod
     def write(filename, version):
         """
-        Write a version to a file as a single line in the form
-        `VERSION = 'MAJOR.MINOR.PATH-TAG'`
+        Write a single line containing the version object to filename.
+        This will overwrite the existing file if it exists.
+
+        :param filename: The file to create with the new version object
+        :param version: a valid version object.
+        :return: A tuple of the filename and the version object
         """
 
         if not isinstance(version, Version):

@@ -153,6 +153,11 @@ class TestVersionManager(unittest.TestCase):
         v = Version.find("test_data")
         self.assertEqual(v, Version(0, 0, 1, "alpha"))
 
+    def test_field(self):
+        v = Version()
+        self.assertRaises(VersionError, v.field, "dummy")
+        self.assertEqual(v.field("major"), v.major)
+
 
 if __name__ == '__main__':
     unittest.main()
