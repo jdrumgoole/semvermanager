@@ -110,3 +110,5 @@ venv.bak/
 VERSION
 VERSION.old
 setup.py.old
+
+.DS_Store
