@@ -2,16 +2,16 @@
 import argparse
 import os
 import sys
-
-from semvermanager import Version
+from semvermanager import Version, VersionError
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--filename",
-        default=Version.FILENAME,
+        "filenames",
+        default=[Version.FILENAME],
+        nargs='*',
         help="File to use as version file [default: %(default)s]"
     )
 
@@ -56,10 +56,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Update multiple version strings in file"
     )
+
+    parser.add_argument(
+        "--versionlabel",
+        default="VERSION",
+        help="field used to determine which line is the version line [default: %(default)s]"
+    )
     args = parser.parse_args()
 
     if args.version:
-        version = Version.parse_version("VERSION="+args.version)
+        version = Version.parse_version("VERSION="+args.version, lhs=args.versionlabel)
 
     if args.make:
         if args.overwrite or not os.path.isfile(args.filename):
@@ -68,7 +74,7 @@ if __name__ == "__main__":
         elif os.path.isfile(args.filename):
             answer = input(f"Overwrite file '{args.filename}' (Y/N [N]: ")
             if len(answer) > 0 and answer.strip().lower() == 'y':
-                filename, version = Version.write(args.filename)
+                filename, version = Version.write(args.filename, args.versionlabel)
                 print(f"Overwrote {version} in '{args.filename}'")
 
     if args.getversion:
@@ -80,7 +86,7 @@ if __name__ == "__main__":
 
     if args.bareversion:
         if os.path.isfile(args.filename):
-            v = Version.find(args.filename)
+            v = Version.find(args.filename, args.versionlabel)
             print(v.bare_version())
         else:
             print(f"No such version file: '{args.filename}'")
@@ -89,14 +95,14 @@ if __name__ == "__main__":
         if not os.path.isfile(args.filename):
             print(f"No such file:'{args.filename}' can't bump {args.bump} version")
             sys.exit(1)
-        v = Version.find(args.filename)
+        v = Version.find(args.filename, args.versionlabel)
         print(f"Bumping '{args.bump}' value from {v.field(args.bump)} ", end="")
         v.bump(args.bump)
         print(f"to {v.field(args.bump)} in '{args.filename}'")
-        Version.update(args.filename, v)
+        Version.update(args.filename, v, args.versionlabel)
         print(f"new version: {v}")
 
     if args.update:
         print(f"Updating '{args.filename}' with version '{version}'")
-        Version.update(filename=args.filename, version=version)
+        Version.update(filename=args.filename, version=version, lhs=args.versionlabel)
 

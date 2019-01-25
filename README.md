@@ -51,7 +51,7 @@ $
    
 ## Docs
 
-Full class docs are on readthedocs.io.
+Full docs are on [readthedocs.io](https://semvermanager.readthedocs.io/en/latest/).
 
 ## Source code
 

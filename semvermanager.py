@@ -51,17 +51,35 @@ class Version:
     FIELDS = ["major", "minor", "patch", "tag"]
     FILENAME = "VERSION"
 
-    def __init__(self, major=0, minor=0, patch=0, tag="alpha"):
+    def __init__(self, major=0, minor=0, patch=0, tag="alpha", lhs="VERSION"):
         """
-
         :param major: 0-n
         :param minor: 0-n
         :param patch: 0-n
         :param tag: member of Version.TAGs.values()
+        :param lhs : str The candidate str for the lhs of a VERSION line
         """
-        self._major = major
-        self._minor = minor
-        self._patch = patch
+        if isinstance(lhs, str):
+            self._lhs = lhs
+        else:
+            raise VersionError(f"{lhs} is not a str type")
+
+        if isinstance(major, int) and major >= 0:
+
+            self._major = major
+        else:
+            raise VersionError(f"{major} is not an int type or is a negative int")
+
+        if isinstance(minor, int) and minor >= 0:
+            self._minor = minor
+        else:
+            raise VersionError(f"{minor} is not and int type or is a negative int")
+
+        if isinstance(patch, int) and minor >= 0:
+            self._patch = patch
+        else:
+            raise VersionError(f"{patch} is not and int type or is a negative int")
+
         self._tag_index = None
         self._tag = None
         for k, v in Version.TAGS.items():
@@ -71,8 +89,6 @@ class Version:
 
         if self._tag_index is None:
             raise VersionError(f"'{tag}' is not a valid version tag")
-
-
 
     def bump(self, field):
         self.bump_map()[field]()
@@ -95,6 +111,10 @@ class Version:
         else:
             self._tag_index += 1
         self._tag = Version.TAGS[self._tag_index]
+
+    @property
+    def lhs(self):
+        self._lhs
 
     @property
     def major(self):
@@ -161,9 +181,8 @@ class Version:
             raise VersionError(f"No such field name'{field}'")
         return self.field_map()[field]
 
-
     @staticmethod
-    def update(filename=None, version=None):
+    def update(filename=None, version=None, lhs="VERSION"):
         """
         Find any line starting with "VERSION" and replace that line with
         the new `version`.
@@ -184,7 +203,7 @@ class Version:
             with open(filename+".temp", "w") as output_file:
                 for i, line in enumerate(input_file, 1):
                     candidate = line.strip()
-                    if candidate.startswith("VERSION"):
+                    if candidate.startswith(lhs):
                         output_file.write(f"{str(version)}\n")
                         lines.append(i)
                         count = count + 1
@@ -217,7 +236,7 @@ class Version:
         return filename, version
 
     @staticmethod
-    def find(filename):
+    def find(filename, lhs="VERSION"):
         """Look for the first instance of a VERSION definition in a file
         and try and parse it as a `Version`"""
 
@@ -225,7 +244,7 @@ class Version:
         with open(filename, "r") as file:
             for line in file:
                 line = line.strip()
-                if line.startswith("VERSION"):
+                if line.startswith(lhs):
                     version = Version.parse_version(line)
                     break
 
@@ -268,14 +287,15 @@ class Version:
         return Version(major, minor, patch, tag)
 
     @staticmethod
-    def parse_version(line):
+    def parse_version(line: str, lhs: str = "VERSION") -> object:
         line = line.strip()
-        if line.startswith("VERSION"):
+        if line.startswith(lhs):
             try:
                 version_label, rhs = line.split("=")
                 version_label = version_label.strip()
                 rhs = rhs.strip()
-                assert version_label == "VERSION"
+                if version_label != lhs:
+                    raise VersionError(f"{line} has wrong left hand side {version_label}")
             except ValueError as e:
                 raise VersionError(f"{e} : in '{line}'")
         else:
@@ -298,7 +318,7 @@ class Version:
         except ValueError as e:
             raise VersionError(f"{e} : in '{version}'")
 
-        return Version(major, minor, patch, tag)
+        return Version(major, minor, patch, tag, lhs=version)
 
     def __eq__(self, other):
         return self.major == other.major and \
@@ -307,7 +327,7 @@ class Version:
                self.tag == other.tag
 
     def __str__(self):
-        return f"VERSION = '{self._major}.{self._minor}.{self._patch}-{self._tag}'"
+        return f"{self._lhs} = '{self._major}.{self._minor}.{self._patch}-{self._tag}'"
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.major}, {self.minor}, {self.patch}, '{self.tag}')"
