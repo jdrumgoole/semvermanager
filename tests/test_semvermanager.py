@@ -112,6 +112,29 @@ class TestVersionManager(unittest.TestCase):
             if os.path.isfile(temp_filename):
                 os.unlink(temp_filename)
 
+    def test_file_write_sep(self):
+
+        temp_filename = temp.tempfile()
+        try:
+            v = Version(0, 4, 1, "beta", separator=":")
+            Version.write(temp_filename, v)
+            x = Version.read(temp_filename, separator=":")
+            self.assertEqual(x, v)
+            x.bump_tag()
+            Version.write(temp_filename, x)
+            w = Version.read(temp_filename, separator=":")
+            self.assertEqual(x, w)
+
+            v = Version(0, 3, 1, 'beta', separator="->")  # test single quotes for tag
+            Version.write(temp_filename, v)
+            x = Version.read(temp_filename, separator="->")
+            self.assertEqual(x, v)
+
+        finally:
+            if os.path.isfile(temp_filename):
+                os.unlink(temp_filename)
+
+
     def test_file_update(self):
 
         v = Version(0, 4, 2, "prod")
@@ -149,6 +172,9 @@ class TestVersionManager(unittest.TestCase):
 
         v = Version.parse_version("version = '0.0.1-alpha'", lhs="version")
         self.assertEqual(v, Version(0, 0, 1, "alpha"))
+
+        v = Version.parse_version("version : '0.0.1-alpha'", lhs="version", separator=":")
+        self.assertEqual(v, Version(0, 0, 1, "alpha", separator=":"))
 
     def test_find(self):
         # looking for VERSION = '0.0.1-alpha' in test_data

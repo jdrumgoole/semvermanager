@@ -51,7 +51,7 @@ class Version:
     FIELDS = ["major", "minor", "patch", "tag"]
     FILENAME = "VERSION"
 
-    def __init__(self, major=0, minor=0, patch=0, tag="alpha", lhs="VERSION"):
+    def __init__(self, major=0, minor=0, patch=0, tag="alpha", lhs="VERSION", separator="="):
         """
         :param major: 0-n
         :param minor: 0-n
@@ -80,6 +80,7 @@ class Version:
         else:
             raise VersionError(f"{patch} is not and int type or is a negative int")
 
+        self._separator = separator
         self._tag_index = None
         self._tag = None
         for k, v in Version.TAGS.items():
@@ -182,7 +183,7 @@ class Version:
         return self.field_map()[field]
 
     @staticmethod
-    def update(filename=None, version=None, lhs="VERSION"):
+    def update(filename, version, lhs="VERSION", seperator="="):
         """
         Find any line starting with "VERSION" and replace that line with
         the new `version`.
@@ -191,11 +192,6 @@ class Version:
         :param version: The new version object
         :return: A tuple (number of lines updated, list(line_numbers))
         """
-        if not filename:
-            filename = Version.FILENAME
-
-        if not version:
-            version = Version()
 
         count = 0 # Number of replacements
         lines: List[int] = [] # line numbers of replacement lines
@@ -204,9 +200,15 @@ class Version:
                 for i, line in enumerate(input_file, 1):
                     candidate = line.strip()
                     if candidate.startswith(lhs):
-                        output_file.write(f"{str(version)}\n")
-                        lines.append(i)
-                        count = count + 1
+                        try:
+                            v = Version.parse_version(line, lhs, separator=seperator)
+                            if v:
+                                output_file.write(f"{str(version)}\n")
+                                lines.append(i)
+                                count = count + 1
+                        except VersionError:
+                            output_file.write(line)
+
                     else:
                         output_file.write(line)
 
@@ -236,7 +238,7 @@ class Version:
         return filename, version
 
     @staticmethod
-    def find(filename, lhs="VERSION"):
+    def find(filename, lhs="VERSION", separator="="):
         """Look for the first instance of a VERSION definition in a file
         and try and parse it as a `Version`"""
 
@@ -245,17 +247,18 @@ class Version:
             for line in file:
                 line = line.strip()
                 if line.startswith(lhs):
-                    version = Version.parse_version(line)
+                    version = Version.parse_version(line, lhs=lhs, separator=separator)
                     break
 
         return version
 
     @staticmethod
-    def read(filename):
+    def read(filename, separator="="):
         """
         Read a single line from filename and parse it as version string.
 
         :param filename: a file containing a single line VERSION string.
+        :param separator: the character seperating the VERSION label from the value
         :return: a Version object
 
         :raises VersionError if it fails to parse the file.
@@ -266,7 +269,7 @@ class Version:
             line.rstrip()
 
         try:
-            _, rhs = line.split("=")
+            _, rhs = line.split(separator)
         except ValueError as e:
             raise VersionError(e)
 
@@ -284,14 +287,14 @@ class Version:
         except ValueError as e:
             raise VersionError(e)
 
-        return Version(major, minor, patch, tag)
+        return Version(major, minor, patch, tag, separator=separator)
 
     @staticmethod
-    def parse_version(line: str, lhs: str = "VERSION") -> object:
+    def parse_version(line: str, lhs: str = "VERSION", separator="=") -> object:
         line = line.strip()
         if line.startswith(lhs):
             try:
-                version_label, rhs = line.split("=")
+                version_label, rhs = line.split(separator)
                 version_label = version_label.strip()
                 rhs = rhs.strip()
                 if version_label != lhs:
@@ -318,7 +321,7 @@ class Version:
         except ValueError as e:
             raise VersionError(f"{e} : in '{version}'")
 
-        return Version(major, minor, patch, tag, lhs=version)
+        return Version(major, minor, patch, tag, lhs=lhs, separator=separator)
 
     def __eq__(self, other):
         return self.major == other.major and \
@@ -327,7 +330,7 @@ class Version:
                self.tag == other.tag
 
     def __str__(self):
-        return f"{self._lhs} = '{self._major}.{self._minor}.{self._patch}-{self._tag}'"
+        return f"{self._lhs} {self._separator} '{self._major}.{self._minor}.{self._patch}-{self._tag}'"
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.major}, {self.minor}, {self.patch}, '{self.tag}')"

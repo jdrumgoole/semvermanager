@@ -1,11 +1,11 @@
 import unittest
-from command import EchoCommand
+import command
 
 
 class TestCommand(unittest.TestCase):
     def test_command(self):
-        cmd = EchoCommand()
-        self.cmd()
+        cmd = command.EchoCommand()
+        cmd(1, 2, 3, 4, this="that", these="those")
 
 
 if __name__ == '__main__':
