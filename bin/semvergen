@@ -45,10 +45,9 @@ class MakeCommand(Command):
                 v = None
 
         return f, v
+    
 
-
-if __name__ == "__main__":
-
+def main(args):
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -111,7 +110,8 @@ if __name__ == "__main__":
         default="=",
         help="Character used to separate the version label from the version [default: %(default)s]"
     )
-    args = parser.parse_args()
+
+    args = parser.parse_args(args)
 
     if args.version:
         version = Version.parse_version("VERSION="+args.version, lhs=args.label)
@@ -174,3 +174,6 @@ if __name__ == "__main__":
         print(f"Updating '{args.filename}' with version '{version}'")
         Version.update(filename=args.filename, version=version, lhs=args.label)
 
+
+if __name__ == "__main__":
+    main(sys.argv)

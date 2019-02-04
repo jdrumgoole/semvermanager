@@ -5,7 +5,10 @@ import temp
 
 from semvermanager import Version, VersionError
 
-
+def _create_file(f):
+    f.write("""
+    
+    """)
 class TestVersionManager(unittest.TestCase):
 
     def test_init(self):
