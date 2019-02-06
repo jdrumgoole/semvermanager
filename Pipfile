@@ -11,6 +11,7 @@ temp = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 twine = "*"
+keyring = "*"
 
 [requires]
 python_version = "3.6"

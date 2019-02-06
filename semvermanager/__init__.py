@@ -440,6 +440,9 @@ class MakeCommand(Command):
 
 
 def main(args):
+    if args is None:
+        args = sys.argv
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(

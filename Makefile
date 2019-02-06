@@ -36,3 +36,7 @@ release: test
 	git add -u
 	git commit -m"Checkin for release to pypi"
 	python3 setup.py upload
+
+init:
+	keyring set https://test.pypi.org/legacy/ jdrumgoole
+	keyring set https://upload.pypi.org/legacy/ jdrumgoole
