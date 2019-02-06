@@ -27,10 +27,11 @@ tag_version:
 test:
 	python3 setup.py test
 
-commit:
+push:
 	git add -u
 	git commit -m"WIP"
-	
+	git push
+
 release: test
 	git add -u
 	git commit -m"Checkin for release to pypi"
