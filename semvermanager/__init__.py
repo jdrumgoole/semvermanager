@@ -439,7 +439,7 @@ class MakeCommand(Command):
         return f, v
 
 
-def main(args):
+def main(args=None):
     if args is None:
         args = sys.argv
 

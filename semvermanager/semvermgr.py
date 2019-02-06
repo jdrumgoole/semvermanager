@@ -47,7 +47,14 @@ class MakeCommand(Command):
         return f, v
     
 
+def script_main():
+    main(sys.argv)
+
+
 def main(args=None):
+    if not args:
+        args = sys.argv
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
