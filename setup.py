@@ -18,11 +18,10 @@ URL = 'https://github.com/jdrumgoole/semvermanager'
 EMAIL = 'joe@joedrumgoole.com'
 AUTHOR = 'Joe Drumgoole'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.0.4-alpha4'
+VERSION = '0.0.4-alpha6'
 
 # What packages are required for this module to be executed?
-REQUIRED = [
-]
+REQUIRED = []
 
 # What packages are optional?
 EXTRAS = {
