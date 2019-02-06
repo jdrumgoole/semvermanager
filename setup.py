@@ -18,7 +18,7 @@ URL = 'https://github.com/jdrumgoole/semvermanager'
 EMAIL = 'joe@joedrumgoole.com'
 AUTHOR = 'Joe Drumgoole'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.0.4-alpha6'
+VERSION = '0.0.4-alpha8'
 
 # What packages are required for this module to be executed?
 REQUIRED = []
@@ -126,7 +126,7 @@ setup(
         'upload': UploadCommand,
     },
     entry_points={
-        'console_scripts': ['semvermgr=semvermanager.semvermgr:main'],
+        'console_scripts': ['semvermgr=semvermanager:main'],
     },
     test_suite='nose.collector',
     tests_require=['nose'],

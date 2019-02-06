@@ -6,8 +6,7 @@ import sys
 
 import temp
 
-from semvermanager import Version, VersionError
-from semvermgr import main
+from semvermanager import Version, VersionError, main
 
 
 @contextmanager
@@ -86,7 +85,7 @@ class TestVersionManager(unittest.TestCase):
         v.bump_tag_version()
         self.assertEqual(v.tag, "alpha")
         self.assertEqual(v.tag_version, 1)
-        self.assertEqual(v, Version( 0, 0, 1, "alpha", 1))
+        self.assertEqual(v, Version(0, 0, 1, "alpha", 1))
 
         v.bump_patch()
         self.assertEqual(v.patch, 2)
@@ -165,7 +164,6 @@ class TestVersionManager(unittest.TestCase):
         try:
             v.write(temp_filename)
             v2 = Version(0, 4, 3, "")
-            print(v2)
             Version.update(temp_filename, v2)
             v3 = Version().read(temp_filename)
             self.assertEqual(v2, v3)

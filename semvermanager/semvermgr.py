@@ -3,7 +3,7 @@ import argparse
 import os
 import sys
 from semvermanager import Version
-from command import Command, CommandRunner
+from semvermanager.command import Command, CommandRunner
 
 
 class BumpCommand(Command):

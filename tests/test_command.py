@@ -1,5 +1,5 @@
 import unittest
-import command
+from semvermanager import command
 
 
 class TestCommand(unittest.TestCase):

@@ -26,7 +26,7 @@ author = 'Joe Drumgoole'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.0.2-alpha1'
+release = '0.0.2-alpha8'
 
 
 # -- General configuration ---------------------------------------------------
