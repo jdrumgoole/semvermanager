@@ -34,12 +34,12 @@ class MakeCommand(Command):
 
         v = Version(lhs=version_label, separator=separator)
         if self._overwrite or not os.path.isfile(filename):
-            f, v = Version.write(filename, v)
+            f, v = v.write(filename)
 
         elif os.path.isfile(filename):
             answer = input(f"Overwrite file '{filename}' (Y/N [N]: ")
             if len(answer) > 0 and answer.strip().lower() == 'y':
-                f, v = Version.write(filename, v)
+                f, v = v.write(filename)
             else:
                 f = filename
                 v = None
@@ -49,13 +49,6 @@ class MakeCommand(Command):
 
 def main(args):
     parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "filenames",
-        default=[Version.FILENAME],
-        nargs='*',
-        help="Files to use as version file [default: %(default)s]"
-    )
 
     parser.add_argument(
         "--version",
@@ -111,6 +104,12 @@ def main(args):
         help="Character used to separate the version label from the version [default: %(default)s]"
     )
 
+    parser.add_argument(
+        "filenames",
+        nargs='*',
+        help="Files to use as version file"
+    )
+
     args = parser.parse_args(args)
 
     if args.version:
@@ -118,7 +117,7 @@ def main(args):
 
     if args.make:
         cmd_runner = CommandRunner(MakeCommand(args.overwrite))
-        for f,v in cmd_runner(args.filenames, args.label, args.separator):
+        for f, v in cmd_runner(args.filenames, args.label, args.separator):
             if v:
                 print(f"Created version {v} in '{f}'")
             else:
@@ -176,4 +175,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main(sys.argv[1:])  # clip off the program name
