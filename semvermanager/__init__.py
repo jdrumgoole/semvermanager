@@ -33,7 +33,7 @@ import sys
 import argparse
 
 from typing import List
-from .command import Command, CommandError, CommandRunner, EchoCommand
+from .command import Command,  Query, QueryError,  CommandError, OperationRunner, EchoCommand
 
 
 class VersionError(ValueError):
@@ -254,7 +254,7 @@ class Version:
         os.rename(filename, filename+".old")
         os.rename(filename+".temp", filename)
 
-        return count, lines
+        return filename, lines
 
     def write(self, filename):
         """
@@ -390,6 +390,7 @@ class Version:
     def __repr__(self):
         return f"{self.__class__.__qualname__}({self.major}, {self.minor}, {self.patch}, '{self.tag}', {self.tag_version}, '{self._lhs}', '{self._separator}')"
 
+    @property
     def bare_version(self):
         if self.tag == "":
             return f'{self._major}.{self._minor}.{self._patch}'
@@ -401,18 +402,26 @@ class BumpCommand(Command):
 
     def __call__(self, filename, label, separator, bump_field):
         if not os.path.isfile(filename):
-            print(f"No such file:'{filename}' can't bump {bump_field} version")
-            return filename, None
+            return False, f"No such file:'{filename}' can't bump {bump_field} version"
+
         v = Version.find(filename, label, separator)
         if v:
-            print(f"Bumping '{bump_field}' value from {v.field(bump_field)} ", end="")
             v.bump(bump_field)
-            print(f"to {v.field(bump_field)} in '{filename}'")
             Version.update(filename, v, label, separator)
-            print(f"new version: {v}")
+            self.q.put((filename, v))
         else:
-            print(f"Couldn't bump value in {filename}")
-        return filename, v
+            raise VersionError(f"No label or version in {filename}")
+
+
+class UpdateCommand(Command):
+
+    def __call__(self, filename, version, label, separator):
+        if not os.path.isfile(filename):
+            raise CommandError(f"No such file:'{filename}' can't bump {label} version")
+
+        filename, lines = Version.update(filename=filename, version=version, lhs=label)
+        self.q.put((filename, lines))
+        return self
 
 
 class MakeCommand(Command):
@@ -432,11 +441,23 @@ class MakeCommand(Command):
             answer = input(f"Overwrite file '{filename}' (Y/N [N]: ")
             if len(answer) > 0 and answer.strip().lower() == 'y':
                 f, v = v.write(filename)
+                return True, f"Made new version {v} in file: '{filename}'"
             else:
                 f = filename
                 v = None
 
         return f, v
+
+
+class GetVersionQuery(Query):
+
+    def __call__(self, filename):
+        try:
+            if os.path.isfile(filename):
+                v = Version.find(filename)
+                self.q.put((filename,v))
+        except FileNotFoundError as e:
+            raise QueryError(e)
 
 
 def main(args=None):
@@ -447,7 +468,7 @@ def main(args=None):
 
     parser.add_argument(
         "--version",
-        help="Specify a version in the form major.minor.patch-tag"
+        help="Specify a version in the form major.minor.patch-tag<tag_version>"
     )
 
     parser.add_argument(
@@ -459,19 +480,19 @@ def main(args=None):
     parser.add_argument(
         "--bump",
         choices=Version.FIELDS,
-        help="Bump a version field")
+        help=f"Bump a version field based on the arg {Version.FIELDS}")
 
     parser.add_argument(
         "--getversion",
         default=False,
         action="store_true",
-        help="Report the current version in the specified file")
+        help="Report the current version in the specified files")
 
     parser.add_argument(
         "--bareversion",
         default=False,
         action="store_true",
-        help="Return the unquoted version strin with VERSION=")
+        help="Return the unquoted version string with 'VERSION='  removed")
 
     parser.add_argument(
         "--overwrite",
@@ -511,7 +532,7 @@ def main(args=None):
         version = Version.parse_version("VERSION=" + args.version, lhs=args.label)
 
     if args.make:
-        cmd_runner = CommandRunner(MakeCommand(args.overwrite))
+        cmd_runner = OperationRunner(MakeCommand(args.overwrite))
         for f, v in cmd_runner(args.filenames, args.label, args.separator):
             if v:
                 print(f"Created version {v} in '{f}'")
@@ -519,36 +540,34 @@ def main(args=None):
                 print(f"Failed to create version file '{f}'")
 
     if args.getversion:
-        if os.path.isfile(args.filename):
-            v = Version.find(args.filename)
-            print(v)
-        else:
-            print(f"No such version file: '{args.filename}'")
-
-    if args.bareversion:
-        if os.path.isfile(args.filename):
-            v = Version.find(args.filename, args.label)
-            print(v.bare_version())
-        else:
-            print(f"No such version file: '{args.filename}'")
+        cmd_runner = OperationRunner(GetVersionQuery())
+        for cmd in cmd_runner(args.filenames):
+            for filename, item in cmd.items():
+                if args.bareversion:
+                    print(f"Version in {filename} is {item.bareversion}")
+                else:
+                    print(f"Version in {filename} is {item}")
 
     if args.bump:
         if args.bump in Version.FIELDS:
-            cmd_runner = CommandRunner(BumpCommand())
+            cmd_runner = OperationRunner(BumpCommand())
 
-            for filename, v in cmd_runner(args.filenames, args.label, args.separator, args.bump):
-                if v:
-                    print(f"Processed version {v} in file : '{filename}'")
-                else:
-                    print(f"Could not process '{filename}'")
+            for cmd in cmd_runner(args.filenames, args.label, args.separator, args.bump):
+                for filename, version in cmd.items():
+                    if version:
+                        print(f"Processed version {version} in file : '{filename}'")
+                    else:
+                        print(f"Could not process '{filename}'")
 
         else:
             print(f"{args.bump} is not a valid version field, choose one of {Version.FIELDS}")
             sys.exit(1)
 
     if args.update:
-        print(f"Updating '{args.filename}' with version '{version}'")
-        Version.update(filename=args.filename, version=version, lhs=args.label)
+        cmd_runner = OperationRunner(UpdateCommand())
+        for cmd in cmd_runner(args.filename, version, args.label):
+            for filename, lines in cmd.items():
+                print(f"Processed {version} in {filename} at lines {lines}")
 
 
 if __name__ == "__main__":
