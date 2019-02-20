@@ -3,14 +3,14 @@ import argparse
 import os
 import sys
 from semvermanager import Version
-from semvermanager.command import Command, CommandRunner
+from semvermanager.command import Command, OperationRunner
 
 
 class BumpCommand(Command):
 
     def __call__(self, filename, label, separator, bump_field):
             if not os.path.isfile(filename):
-                print(f"No such file:'{filename}' can't bump {bump_field} version")
+                print(f'No such file: \'{filename}\' cannot bump {bump_field} version')
                 return filename, None
             v = Version.find(filename, label, separator)
             if v:
@@ -123,7 +123,7 @@ def main(args=None):
         version = Version.parse_version("VERSION="+args.version, lhs=args.label)
 
     if args.make:
-        cmd_runner = CommandRunner(MakeCommand(args.overwrite))
+        cmd_runner = OperationRunner(MakeCommand(args.overwrite))
         for f, v in cmd_runner(args.filenames, args.label, args.separator):
             if v:
                 print(f"Created version {v} in '{f}'")
@@ -155,7 +155,7 @@ def main(args=None):
 
     if args.bump:
         if args.bump in Version.FIELDS:
-            cmd_runner = CommandRunner(BumpCommand())
+            cmd_runner = OperationRunner(BumpCommand())
 
             for filename, v in cmd_runner(args.filenames, args.label, args.separator,  args.bump):
                 if v:
