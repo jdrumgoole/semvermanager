@@ -412,6 +412,7 @@ class BumpCommand(Command):
         else:
             raise VersionError(f"No label or version in {filename}")
 
+        return self
 
 class UpdateCommand(Command):
 

@@ -14,7 +14,7 @@ class Operation:
         if name:
             self._name = name
         else:
-            self._name = __class__.name
+            self._name = __class__.__qualname__
 
         if q:
             self._q = q
@@ -34,8 +34,10 @@ class Operation:
             item = self.q.get()
             yield item
 
+
 class QueryError(ValueError):
     pass
+
 
 class Query(Operation):
 
@@ -86,7 +88,6 @@ class EchoCommand(Command):
             self._name = name
         else:
             self._name = self.__class__.__qualname__
-
 
     def __call__(self, *args, **kwargs):
         arg_string = ", ".join([str(x) for x in args])

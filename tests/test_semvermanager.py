@@ -230,8 +230,10 @@ URL = 'https://github.com/jdrumgoole/semvermanager'
                 self.assertTrue(out.getvalue().startswith("Created version VERSION = '0.0.0-alpha0' in 'dummy1'"))
                 main(["--bump", "tag_version", "--overwrite", "dummy1"])
         finally:
-            os.unlink("dummy1")
-            os.unlink("dummy2")
+            if os.path.isfile("dummy1"):
+                os.unlink("dummy1")
+            if os.path.isfile("dummy2"):
+                os.unlink("dummy2")
 
 
 if __name__ == '__main__':
