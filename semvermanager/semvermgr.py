@@ -124,20 +124,13 @@ def main(args=None):
 
     if args.make:
         cmd_runner = OperationRunner(MakeCommand(args.overwrite))
+        if not args.filenames:
+            args.filenames = ["VERSION"]  # make a default file
         for f, v in cmd_runner(args.filenames, args.label, args.separator):
             if v:
                 print(f"Created version {v} in '{f}'")
             else:
                 print(f"Failed to create version file '{f}'")
-
-        # if args.overwrite or not os.path.isfile(args.filename):
-        #     filename, version = Version.write(args.filename, Version(lhs=args.versionlabel, separator=args.versionseparator))
-        #     print(f"Created {version} in '{args.filename}'")
-        # elif os.path.isfile(args.filename):
-        #     answer = input(f"Overwrite file '{args.filename}' (Y/N [N]: ")
-        #     if len(answer) > 0 and answer.strip().lower() == 'y':
-        #         filename, version = Version.write(args.filename, args.versionlabel)
-        #         print(f"Overwrote {version} in '{args.filename}'")
 
     if args.getversion:
         if os.path.isfile(args.filename):

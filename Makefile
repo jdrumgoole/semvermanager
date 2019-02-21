@@ -1,30 +1,34 @@
 
+SEMVERMGR="python semvermanager/semvermgr.py"
 
 help:
 	@echo "Pick a release type by looking at the Makefile"
 
 patch:
-	./bin/semvergen --bump patch --filename setup.py
-	./bin/semvergen --bump patch --filename --label release docs/conf.py
+	${SEMVERMGR} --bump patch  setup.py
+	${SEMVERMGR} --bump patch  --label release docs/conf.py
 
 minor:
-	./bin/semvergen --bump minor --filename setup.py
-	./bin/semvergen --bump minor --filename --label release docs/conf.py
+	${SEMVERMGR} --bump minor  setup.py
+	${SEMVERMGR} --bump minor  --label release docs/conf.py
 
 major:
-	./bin/semvergen --bump major --filename setup.py
-	./bin/semvergen --bump major --filename --label release docs/conf.py
+	${SEMVERMGR} --bump major  setup.py
+	${SEMVERMGR} --bump major  --label release docs/conf.py
 
 tag:
-	./bin/semvergen --bump tag --filename setup.py
-	./bin/semvergen --bump tag --filename --label release docs/conf.py
+	${SEMVERMGR} --bump tag  setup.py
+	${SEMVERMGR} --bump tag  --label release docs/conf.py
 
 tag_version:
 	python3 semvermanager/semvermgr.py --bump tag_version setup.py
 	python3 semvermanager/semvermgr.py --bump tag_version --label release docs/conf.py
 
+test_semvermgr:
+	${SEMVERMGR} --make --overwrite tests/TMP_VERSION
+	rm tests/TMP_VERSION
 	
-test:
+test: test_semvermgr
 	python3 setup.py test
 
 push:
