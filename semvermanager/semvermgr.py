@@ -5,6 +5,7 @@ import sys
 from semvermanager import Version
 from semvermanager.command import Command, OperationRunner
 
+VERSION = '1.0.1'
 
 class BumpCommand(Command):
 
@@ -117,7 +118,17 @@ def main(args=None):
         help="Files to use as version file"
     )
 
+    parser.add_argument(
+        "-v",
+        action="store_true",
+        default=False,
+        help="Report the version number"
+    )
     args = parser.parse_args(args)
+
+    if args.v:
+        print(f"semvermgr {VERSION}")
+        sys.exit(0)
 
     if args.version:
         version = Version.parse_version("VERSION="+args.version, lhs=args.label)
