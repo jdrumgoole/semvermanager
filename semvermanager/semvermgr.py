@@ -5,7 +5,7 @@ import sys
 from semvermanager import Version
 from semvermanager.command import Command, OperationRunner
 
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 
 class BumpCommand(Command):
 
