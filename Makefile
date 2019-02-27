@@ -42,8 +42,8 @@ release: test
 	python3 setup.py upload
 
 clean:
-	rm -rf dist *.old semvermanager/*.old
-	
+	rm -rf build dist *.old semvermanager/*.old
+
 init:
 	keyring set https://test.pypi.org/legacy/ jdrumgoole
 	keyring set https://upload.pypi.org/legacy/ jdrumgoole
