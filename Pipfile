@@ -12,6 +12,7 @@ sphinx = "*"
 sphinx-rtd-theme = "*"
 twine = "*"
 keyring = "*"
+semvermanager = "*"
 
 [requires]
 python_version = "3.6"

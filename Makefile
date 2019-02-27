@@ -41,6 +41,9 @@ release: test
 	git commit -m"Checkin for release to pypi"
 	python3 setup.py upload
 
+clean:
+	rm -rf dist *.old semvermanager/*.old
+	
 init:
 	keyring set https://test.pypi.org/legacy/ jdrumgoole
 	keyring set https://upload.pypi.org/legacy/ jdrumgoole
