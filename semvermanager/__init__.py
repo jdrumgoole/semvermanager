@@ -35,7 +35,7 @@ import argparse
 from typing import List
 from .command import Command,  Query, QueryError,  CommandError, OperationRunner, EchoCommand
 
-VERSION = "1.0.1"
+VERSION = '1.0.3'
 
 
 class VersionError(ValueError):

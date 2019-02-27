@@ -5,19 +5,19 @@ help:
 	@echo "Pick a release type by looking at the Makefile"
 
 patch:
-	python ${SEMVERMGR} --bump patch  setup.py semvermanager/semvermanager.py semvermanager/semvermgr.py
+	python ${SEMVERMGR} --bump patch  setup.py semvermanager/__init__.py semvermanager/semvermgr.py
 	python ${SEMVERMGR} --bump patch  --label release docs/conf.py
 
 minor:
-	python ${SEMVERMGR} --bump minor  setup.py semvermanager/semvermanager.py semvermanager/semvermgr.py
+	python ${SEMVERMGR} --bump minor  setup.py semvermanager/__init__.py semvermanager/semvermgr.py
 	python ${SEMVERMGR} --bump minor  --label release docs/conf.py
 
 major:
-	python ${SEMVERMGR} --bump major  setup.py semvermanager/semvermanager.py semvermanager/semvermgr.py
+	python ${SEMVERMGR} --bump major  setup.py semvermanager/__init__.py semvermanager/semvermgr.py
 	python ${SEMVERMGR} --bump major  --label release docs/conf.py
 
 tag:
-	python ${SEMVERMGR} --bump tag  setup.py semvermanager/semvermanager.py semvermanager/semvermgr.py
+	python ${SEMVERMGR} --bump tag  setup.py semvermanager/__init__.py semvermanager/semvermgr.py
 	python ${SEMVERMGR} --bump tag  --label release docs/conf.py
 
 tag_version:
