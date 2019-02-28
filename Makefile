@@ -1,5 +1,5 @@
 
-SEMVERMGR="./semvermanager/semvermgr.py"
+SEMVERMGR="./semvermanager/__main__.py"
 VERSION_FILES=
 help:
 	@echo "Pick a release type by looking at the Makefile"
@@ -42,7 +42,7 @@ release: test
 	python3 setup.py upload
 
 clean:
-	rm -rf build dist *.old semvermanager/*.old
+	rm -rf build dist *.old semvermanager/*.old semvermanager.egg-info
 
 init:
 	keyring set https://test.pypi.org/legacy/ jdrumgoole

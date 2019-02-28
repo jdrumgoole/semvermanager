@@ -6,7 +6,7 @@ import sys
 
 import temp
 
-from semvermanager import Version, VersionError, main
+from semvermanager import Version, VERSION, VersionError, main
 
 
 @contextmanager
@@ -234,6 +234,11 @@ URL = 'https://github.com/jdrumgoole/semvermanager'
                 os.unlink("dummy1")
             if os.path.isfile("dummy2"):
                 os.unlink("dummy2")
+
+    def test_v(self):
+        with captured_output() as (out, err):
+            main(["--program_version"])
+            self.assertTrue(f"{VERSION}" in out.getvalue())
 
 
 if __name__ == '__main__':
