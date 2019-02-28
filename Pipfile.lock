@@ -237,11 +237,11 @@
         },
         "semvermanager": {
             "hashes": [
-                "sha256:733a7ad04b63994fdd7519cfaddecc3dce986757537fa108027364700f819a29",
-                "sha256:90daf9d4f060020bfca8e2d05dd35382d5d57ccf9e0201b034b5be237e9f0f4e"
+                "sha256:c2da631b3f66261d1eecbada508d9178fc07915bbf783e29717eda1de3291363",
+                "sha256:fabebac48814e1d089961826d638b76af7ebac8b5b7534040555c646407628db"
             ],
             "index": "pypi",
-            "version": "==1.0.3"
+            "version": "==1.0.4"
         },
         "six": {
             "hashes": [
