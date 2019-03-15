@@ -35,7 +35,7 @@ import argparse
 from typing import List
 from .command import Command,  Query, QueryError,  CommandError, OperationRunner, EchoCommand
 
-VERSION = '1.0.7'
+VERSION = '1.0.9'
 
 
 class VersionError(ValueError):
@@ -400,7 +400,7 @@ class Version:
             return f'{self._major}.{self._minor}.{self._patch}-{self._tag}{self.tag_version}'
 
 
-VERSION = '1.0.7'
+VERSION = '1.0.9'
 
 
 class BumpCommand(Command):
